@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plant Cloud | ทะเบียนพรรณไม้</title>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+
+<style>
+:root {
+  --green: #28734b;
+  --dark: #174d34;
+  --light: #eaf5ec;
+  --cream: #f7f9f4;
+}
+
+
+* { box-sizing: border-box; }
+
+
+body {
+  margin: 0;
+  font-family: 'Kanit', sans-serif;
+  background: var(--cream);
+  color: #24352b;
+  min-height: 100vh;
+}
+
+
+/* ---------- พื้นหลังดอกไม้เบลอ ----------
+   วาดดอกไม้ด้วย CSS (ไม่ต้องใช้ไฟล์รูป)
+   ถ้าอยากใช้รูปจริง: ใส่รูปไว้ในโฟลเดอร์เดียวกัน แล้วเปลี่ยน background ด้านล่างเป็น
+   background: url('flowers.jpg') center / cover no-repeat;            */
+
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: -60px;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 8% 15%,  #f7a8c4 0 70px,  transparent 140px),
+    radial-gradient(circle at 25% 70%, #ffd36e 0 55px,  transparent 120px),
+    radial-gradient(circle at 45% 25%, #c9a7f2 0 80px,  transparent 160px),
+    radial-gradient(circle at 62% 80%, #ff9fb2 0 90px,  transparent 170px),
+    radial-gradient(circle at 80% 20%, #ffe08a 0 60px,  transparent 130px),
+    radial-gradient(circle at 92% 60%, #f5a3d0 0 75px,  transparent 150px),
+    radial-gradient(circle at 15% 95%, #b8e6a8 0 90px,  transparent 180px),
+    radial-gradient(circle at 70% 45%, #ffffff 0 40px,  transparent 100px),
+    radial-gradient(circle at 35% 45%, #9fd8a0 0 100px, transparent 200px),
+    radial-gradient(circle at 88% 92%, #c4e7b0 0 90px,  transparent 180px),
+    linear-gradient(160deg, #e9f6e6, #fbeef2 50%, #eef4e2);
+  filter: blur(38px) saturate(1.15);
+}
+
+
+/* ชั้นโปร่งแสงทับพื้นหลัง ให้กล่องข้อมูลเด่นขึ้น */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: rgba(247, 249, 244, 0.35);
+}
+
+
+header {
+  background: linear-gradient(135deg, rgba(23, 77, 52, .92), rgba(57, 145, 91, .88));
+  color: white;
+  padding: 25px 7%;
+  box-shadow: 0 6px 24px rgba(23, 77, 52, .25);
+}
+
+
+.nav, .hero, main {
+  max-width: 1100px;
+  margin: auto;
+}
+
+
+.brand {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+
+/* ---------- ระบบลงชื่อ ---------- */
+
+
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.user-box button {
+  background: rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .5);
+  padding: 7px 16px;
+  font-size: 14px;
+}
+
+
+.user-box button:hover {
+  background: rgba(255, 255, 255, .3);
+}
+
+
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(23, 77, 52, .35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+
+.login-overlay[hidden] {
+  display: none;
+}
+
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: white;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
+}
+
+
+.login-card h3 {
+  margin-bottom: 6px;
+}
+
+
+.login-card p {
+  margin-top: 0;
+  color: #718075;
+  font-size: 14px;
+}
+
+
+.login-note {
+  text-align: center;
+  color: #4b5d51;
+}
+
+
+.login-note button {
+  margin-top: 10px;
+}
+
+
+.hero { padding: 35px 0; }
+
+
+.hero h2 {
+  font-size: 34px;
+  margin: 0;
+}
+
+
+main { padding: 25px 20px 50px; }
+
+
+.summary, .form-section, .plant-card, .list-section {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(36, 53, 43, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+
+/* กล่องรายการเป็นกระจกฝ้าบางๆ ให้การ์ดพรรณไม้ข้างในเด่นกว่า */
+.list-section {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+
+.plant-card {
+  background: white;
+  margin-bottom: 0;
+  transition: transform .15s, box-shadow .15s;
+}
+
+
+.plant-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(36, 53, 43, 0.18);
+}
+
+
+.summary strong {
+  display: block;
+  color: var(--green);
+  font-size: 26px;
+}
+
+
+h3 { margin-top: 0; }
+
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0 15px;
+  border: 1px solid #dce6dc;
+  border-radius: 10px;
+  font: inherit;
+}
+
+
+button {
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font: inherit;
+  cursor: pointer;
+}
+
+
+button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+
+#list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  padding: 0;
+  list-style: none;
+}
+
+
+.plant-code {
+  color: var(--green);
+  font-size: 13px;
+}
+
+
+.plant-name {
+  font-size: 21px;
+  margin: 5px 0;
+}
+
+
+.plant-card {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ---------- อนิเมชันการ์ด ---------- */
+
+
+@keyframes cardEnter {
+  0%   { opacity: 0; transform: translateY(24px) scale(.85); }
+  60%  { opacity: 1; transform: translateY(-4px) scale(1.03); }
+  100% { opacity: 1; transform: none; }
+}
+
+
+@keyframes cardGlow {
+  0%, 30% { box-shadow: 0 0 0 4px rgba(57, 145, 91, .55), 0 14px 34px rgba(36, 53, 43, .18); }
+  100%    { box-shadow: 0 10px 30px rgba(36, 53, 43, .12); }
+}
+
+
+@keyframes cardFlash {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+
+@keyframes cardLeave {
+  0%   { opacity: 1; transform: none; }
+  25%  { opacity: 1; transform: rotate(-2deg) scale(1.03); }
+  100% { opacity: 0; transform: translateY(20px) rotate(4deg) scale(.6); }
+}
+
+
+.plant-card.card-enter {
+  animation:
+    cardEnter .55s cubic-bezier(.2, .8, .3, 1.2) both,
+    cardGlow 1.6s ease-out;
+}
+
+
+.plant-card.card-updated {
+  animation:
+    cardFlash .5s ease-out,
+    cardGlow 1.6s ease-out;
+}
+
+
+.plant-card.card-leave {
+  animation: cardLeave .45s ease-in forwards;
+  pointer-events: none;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .plant-card.card-enter,
+  .plant-card.card-updated,
+  .plant-card.card-leave {
+    animation-duration: .01s;
+  }
+}
+
+
+.card-actions {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+
+.photo-button {
+  background: white;
+  color: #8a5a00;
+  border: 1px solid #f0dcb0;
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+
+.photo-button:hover {
+  background: #fff6e0;
+}
+
+
+.edit-button {
+  background: white;
+  color: var(--green);
+  border: 1px solid #cfe3d4;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+
+.edit-button:hover {
+  background: var(--light);
+}
+
+
+.plant-card.editing {
+  outline: 3px solid #f2b84b;
+}
+
+
+.form-section.editing {
+  outline: 3px solid #f2b84b;
+}
+
+
+input[readonly] {
+  background: #f1f4f0;
+  color: #718075;
+}
+
+
+.cancel-button {
+  background: white;
+  color: #4b5d51;
+  border: 1px solid #dce6dc;
+  margin-left: 8px;
+}
+
+
+.delete-button {
+  background: white;
+  color: #c0392b;
+  border: 1px solid #f0c8c3;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+
+.delete-button:hover {
+  background: #fdecea;
+}
+
+
+/* ---------- รูปพรรณไม้บนการ์ด ---------- */
+
+
+.card-cover {
+  position: relative;
+  display: block;
+  width: calc(100% + 44px);
+  margin: -22px -22px 14px;
+  padding: 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+  background: var(--light);
+  cursor: zoom-in;
+}
+
+
+.card-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .3s;
+}
+
+
+.card-cover:hover img {
+  transform: scale(1.05);
+}
+
+
+.photo-count {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: rgba(0, 0, 0, .55);
+  color: white;
+  font-size: 13px;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+
+/* ---------- เลือกรูปในฟอร์ม ---------- */
+
+
+.image-label {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.image-counter {
+  color: #718075;
+  font-size: 14px;
+}
+
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+  margin: 7px 0 6px;
+}
+
+
+.thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--light);
+}
+
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+
+.thumb.is-new::after {
+  content: 'ใหม่';
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  background: var(--green);
+  color: white;
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+
+
+.remove-image {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .6);
+  font-size: 13px;
+  line-height: 26px;
+}
+
+
+.remove-image:hover {
+  background: #c0392b;
+}
+
+
+.add-image {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 2px dashed #b9d3bf;
+  border-radius: 10px;
+  background: rgba(234, 245, 236, .5);
+  color: var(--green);
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+
+
+.add-image:hover {
+  background: var(--light);
+}
+
+
+.add-image[hidden] {
+  display: none;
+}
+
+
+.add-image span {
+  font-size: 26px;
+}
+
+
+.hint {
+  font-size: 13px;
+  color: #718075;
+  margin: 0 0 15px;
+}
+
+
+/* ---------- ดูรูปขนาดใหญ่ ---------- */
+
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(10, 25, 17, .9);
+}
+
+
+.lightbox[hidden] {
+  display: none;
+}
+
+
+.lightbox figure {
+  margin: 0;
+  max-width: min(1000px, 100%);
+  text-align: center;
+}
+
+
+.lightbox img {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+  margin: auto;
+  border-radius: 12px;
+}
+
+
+.lightbox figcaption {
+  color: white;
+  margin-top: 12px;
+}
+
+
+.lightbox-close,
+.lightbox-nav {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .15);
+  font-size: 22px;
+}
+
+
+.lightbox-close:hover,
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, .3);
+}
+
+
+.lightbox-close { top: 14px; right: 14px; }
+
+
+.lightbox-nav {
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 30px;
+}
+
+
+.lightbox-nav.prev { left: 14px; }
+.lightbox-nav.next { right: 14px; }
+
+
+.lightbox-nav[hidden] {
+  display: none;
+}
+
+
+.message {
+  color: #718075;
+  padding: 20px;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+
+.success { color: green; }
+.error { color: #c0392b; }
+
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #3f5a48;
+}
+
+
+</style>
+</head>
+
+
+<body>
+
+
+<header>
+  <div class="nav">
+    <div class="brand">🌿 Plant Cloud</div>
+    <div class="user-box">
+      <span id="userName"></span>
+      <button type="button" id="loginButton">ลงชื่อเข้าใช้</button>
+      <button type="button" id="logoutButton" hidden>ออกจากระบบ</button>
+    </div>
+  </div>
+
+
+  <div class="hero">
+    <h2>สำรวจโลกสีเขียวของเรา</h2>
+    <p>ระบบทะเบียนพรรณไม้ภายในโรงเรียน</p>
+  </div>
+</header>
+
+
+<main>
+
+
+  <section class="summary">
+    🌳 พรรณไม้ทั้งหมดในทะเบียน
+    <strong id="count">กำลังโหลด...</strong>
+  </section>
+
+
+  <section class="list-section">
+    <h3>🌱 รายการพรรณไม้</h3>
+
+
+    <input
+      type="search"
+      id="search"
+      placeholder="ค้นหาชื่อหรือรหัสพรรณไม้..."
+    >
+
+
+    <ul id="list">
+      <li class="message">กำลังโหลดข้อมูล...</li>
+    </ul>
+  </section>
+
+
+  <section class="form-section login-note" id="loginNote">
+    🔒 ลงชื่อเข้าใช้ก่อน จึงจะเพิ่ม แก้ไข หรือลบพรรณไม้ได้
+    <br>
+    <button type="button" id="loginNoteButton">ลงชื่อเข้าใช้</button>
+  </section>
+
+
+  <section class="form-section" id="formSection" hidden>
+    <h3 id="formTitle">➕ เพิ่มข้อมูลพรรณไม้</h3>
+
+
+    <form id="plantForm">
+
+
+      <label>รหัสพรรณไม้ *</label>
+      <input id="code" placeholder="เช่น P001" required>
+
+
+      <label>ชื่อพรรณไม้ *</label>
+      <input id="thaiName" placeholder="ชื่อพรรณไม้" required>
+
+
+      <label>ชื่อวิทยาศาสตร์</label>
+      <input id="scientificName" placeholder="ชื่อวิทยาศาสตร์">
+
+
+      <label>สถานที่ปลูก</label>
+      <input id="location" placeholder="สถานที่ปลูก">
+
+
+      <label class="image-label">
+        รูปพรรณไม้ (ไม่เกิน 5 รูป)
+        <span class="image-counter" id="imageCounter">0/5</span>
+      </label>
+
+
+      <div class="image-grid" id="imageGrid">
+        <label class="add-image" id="addImageTile">
+          <span>📷</span>
+          เพิ่มรูป
+          <input type="file" id="imageInput" accept="image/*" multiple hidden>
+        </label>
+      </div>
+
+
+      <p class="hint">รูปจะถูกย่อขนาดอัตโนมัติก่อนอัปโหลด กด ✕ เพื่อเอารูปออก</p>
+
+
+      <button type="submit" id="saveButton">
+        บันทึกข้อมูล
+      </button>
+
+
+      <button type="button" id="cancelEditButton" class="cancel-button" hidden>
+        ยกเลิกการแก้ไข
+      </button>
+
+
+      <p id="formMessage" role="status"></p>
+
+
+    </form>
+  </section>
+
+
+</main>
+
+
+<div class="lightbox" id="lightbox" hidden>
+  <button type="button" class="lightbox-close" id="lightboxClose" aria-label="ปิด">✕</button>
+  <button type="button" class="lightbox-nav prev" id="lightboxPrev" aria-label="รูปก่อนหน้า">‹</button>
+  <figure>
+    <img id="lightboxImage" alt="">
+    <figcaption id="lightboxCaption"></figcaption>
+  </figure>
+  <button type="button" class="lightbox-nav next" id="lightboxNext" aria-label="รูปถัดไป">›</button>
+</div>
+
+
+<div class="login-overlay" id="loginOverlay" hidden>
+  <form class="login-card" id="loginForm">
+    <h3>👤 ลงชื่อเข้าใช้</h3>
+    <p>ใส่ชื่อของคุณ ระบบจะจำไว้ในเครื่องนี้ ครั้งหน้าไม่ต้องลงชื่อใหม่</p>
+
+
+    <label for="loginName">ชื่อ *</label>
+    <input id="loginName" placeholder="เช่น ครูสมศรี" maxlength="50" required autocomplete="name">
+
+
+    <button type="submit">เข้าสู่ระบบ</button>
+    <button type="button" class="cancel-button" id="loginCancel">ยกเลิก</button>
+  </form>
+</div>
+
+
+<footer>
+  🌿 Plant Cloud · ทะเบียนพรรณไม้เพื่อพื้นที่สีเขียวที่ยั่งยืน
+  <br>
+  <small>
+    รูปตัวอย่างพรรณไม้จาก
+    <a href="https://commons.wikimedia.org/" target="_blank" rel="noopener">Wikimedia Commons</a>
+    · <a href="image-credits.md" target="_blank">เครดิตผู้ถ่ายภาพ</a>
+  </small>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+
+
+<script>
+
+
+// 1. เชื่อมต่อ Supabase
+//    ใส่ค่าจาก Supabase Dashboard > Project Settings > API
+//    ใช้ "anon public" key เท่านั้น (ห้ามใช้ service_role key ในหน้าเว็บ)
+
+
+const SUPABASE_URL = 'https://fbpmamlbutzeocnedzbv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_O3mByJ00epIOuqnJCLOr4w_86Wj-_Mc';
+const TABLE_NAME = 'plants';
+
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+const db = {
+  async select() {
+    return await supabaseClient
+      .from(TABLE_NAME)
+      .select('plant_code, thai_name, scientific_name, location, images')
+      .order('plant_code', { ascending: true });
+  },
+  async insert(plant) {
+    return await supabaseClient
+      .from(TABLE_NAME)
+      .insert(plant);
+  },
+  async update(plantCode, changes) {
+    // .select() คืนแถวที่ถูกแก้ ใช้เช็กว่าแก้ได้จริง (ถ้าไม่มี policy จะได้ 0 แถว)
+    return await supabaseClient
+      .from(TABLE_NAME)
+      .update(changes)
+      .eq('plant_code', plantCode)
+      .select('plant_code');
+  },
+  async remove(plantCode) {
+    // .select() คืนแถวที่ถูกลบ ใช้เช็กว่าลบได้จริง
+    // (ถ้าไม่มี policy ให้ลบ Supabase จะไม่แจ้ง error แต่ลบได้ 0 แถว)
+    return await supabaseClient
+      .from(TABLE_NAME)
+      .delete()
+      .eq('plant_code', plantCode)
+      .select('plant_code');
+  }
+};
+
+
+// 1.1 รูปพรรณไม้ (Supabase Storage)
+
+
+const IMAGE_BUCKET = 'plant-images';
+const MAX_IMAGES = 5;
+const MAX_IMAGE_SIDE = 1280; // ย่อด้านยาวสุดเหลือไม่เกินกี่พิกเซล
+
+
+function imageUrl(path) {
+  return supabaseClient.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+
+function loadImageElement(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+
+// ย่อรูปและแปลงเป็น JPEG ก่อนอัปโหลด ช่วยประหยัดพื้นที่และโหลดเร็วขึ้น
+async function resizeImage(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    let img;
+    try {
+      img = await loadImageElement(url);
+    } catch (e) {
+      throw new Error('เปิดไฟล์รูป "' + file.name + '" ไม่ได้ (ลองใช้ไฟล์ JPG หรือ PNG)');
+    }
+
+
+    const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(img.width, img.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = 'white'; // พื้นขาวสำหรับรูป PNG โปร่งใส
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+
+    return await new Promise((resolve, reject) =>
+      canvas.toBlob(
+        blob => blob ? resolve(blob) : reject(new Error('แปลงรูปไม่สำเร็จ')),
+        'image/jpeg',
+        0.85
+      )
+    );
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+
+// อัปโหลดหลายรูป ถ้ารูปไหนพลาด จะลบรูปที่อัปไปแล้วในรอบนี้ทิ้ง แล้วแจ้ง error
+async function uploadImages(files) {
+  const paths = [];
+  for (const file of files) {
+    const blob = await resizeImage(file).catch(async e => {
+      await removeImages(paths);
+      throw e;
+    });
+
+
+    const path = 'plants/' + Date.now() + '-' +
+      Math.random().toString(36).slice(2, 10) + '.jpg';
+
+
+    const { error } = await supabaseClient.storage
+      .from(IMAGE_BUCKET)
+      .upload(path, blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+
+
+    if (error) {
+      await removeImages(paths);
+      throw new Error('อัปโหลดรูปไม่สำเร็จ: ' + error.message);
+    }
+    paths.push(path);
+  }
+  return paths;
+}
+
+
+async function removeImages(paths) {
+  if (!paths || paths.length === 0) return;
+  try {
+    const { error } = await supabaseClient.storage.from(IMAGE_BUCKET).remove(paths);
+    if (error) console.warn('ลบรูปไม่สำเร็จ', error);
+  } catch (e) {
+    console.warn('ลบรูปไม่สำเร็จ', e);
+  }
+}
+
+
+// 2. ประกาศตัวแปร
+
+
+const list = document.getElementById('list');
+const count = document.getElementById('count');
+const search = document.getElementById('search');
+const plantForm = document.getElementById('plantForm');
+const saveButton = document.getElementById('saveButton');
+const formMessage = document.getElementById('formMessage');
+const formSection = document.getElementById('formSection');
+const formTitle = document.getElementById('formTitle');
+const cancelEditButton = document.getElementById('cancelEditButton');
+const codeInput = document.getElementById('code');
+
+
+let plants = [];
+let editingCode = null; // รหัสพรรณไม้ที่กำลังแก้ไข (null = โหมดเพิ่มใหม่)
+
+
+// 2.0 รูปในฟอร์ม
+//     รูปเดิม = { path }   รูปใหม่ที่ยังไม่อัปโหลด = { file, preview }
+
+
+const imageGrid = document.getElementById('imageGrid');
+const addImageTile = document.getElementById('addImageTile');
+const imageInput = document.getElementById('imageInput');
+const imageCounter = document.getElementById('imageCounter');
+
+
+let formImages = [];
+let removedImages = []; // path ของรูปเดิมที่ถูกเอาออกระหว่างแก้ไข
+
+
+function renderFormImages() {
+
+
+  const thumbs = formImages.map((item, index) => {
+    const box = document.createElement('div');
+    box.className = 'thumb' + (item.file ? ' is-new' : '');
+
+
+    const img = document.createElement('img');
+    img.src = item.file ? item.preview : imageUrl(item.path);
+    img.alt = 'รูปที่ ' + (index + 1);
+
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'remove-image';
+    remove.textContent = '✕';
+    remove.setAttribute('aria-label', 'เอารูปที่ ' + (index + 1) + ' ออก');
+    remove.addEventListener('click', () => {
+      const [removed] = formImages.splice(index, 1);
+      if (removed.preview) URL.revokeObjectURL(removed.preview);
+      if (removed.path) removedImages.push(removed.path);
+      renderFormImages();
+    });
+
+
+    box.append(img, remove);
+    return box;
+  });
+
+
+  imageGrid.replaceChildren(...thumbs, addImageTile);
+  addImageTile.hidden = formImages.length >= MAX_IMAGES;
+  imageCounter.textContent = formImages.length + '/' + MAX_IMAGES;
+}
+
+
+function clearFormImages() {
+  formImages.forEach(item => item.preview && URL.revokeObjectURL(item.preview));
+  formImages = [];
+  removedImages = [];
+  renderFormImages();
+}
+
+
+imageInput.addEventListener('change', () => {
+
+
+  const picked = [...imageInput.files].filter(f => f.type.startsWith('image/'));
+  imageInput.value = '';
+
+
+  const space = MAX_IMAGES - formImages.length;
+
+
+  if (picked.length > space) {
+    alert('ใส่รูปได้ไม่เกิน ' + MAX_IMAGES + ' รูป\nเพิ่มได้อีก ' + space + ' รูป ระบบจะเลือกรูปแรกๆ ให้');
+  }
+
+
+  picked.slice(0, space).forEach(file => {
+    formImages.push({ file, preview: URL.createObjectURL(file) });
+  });
+
+
+  renderFormImages();
+});
+
+
+// การ์ดที่ต้องเล่นอนิเมชันในการแสดงผลรอบถัดไป
+// { codes: ['P001', ...], type: 'card-enter' | 'card-updated' }
+let animateNext = null;
+
+
+// 2.1 ระบบลงชื่อ (จำชื่อไว้ในเบราว์เซอร์ ไม่ใช้อีเมล)
+
+
+const USER_KEY = 'plantCloud.user';
+
+
+const userNameLabel = document.getElementById('userName');
+const loginButton = document.getElementById('loginButton');
+const logoutButton = document.getElementById('logoutButton');
+const loginNote = document.getElementById('loginNote');
+const loginNoteButton = document.getElementById('loginNoteButton');
+const loginOverlay = document.getElementById('loginOverlay');
+const loginForm = document.getElementById('loginForm');
+const loginNameInput = document.getElementById('loginName');
+const loginCancel = document.getElementById('loginCancel');
+
+
+let currentUser = null;
+
+
+try {
+  currentUser = localStorage.getItem(USER_KEY) || null;
+} catch (e) {
+  currentUser = null;
+}
+
+
+function updateUserUI() {
+  const loggedIn = !!currentUser;
+
+
+  userNameLabel.textContent = loggedIn ? '👤 ' + currentUser : '';
+  loginButton.hidden = loggedIn;
+  logoutButton.hidden = !loggedIn;
+  loginNote.hidden = loggedIn;
+  formSection.hidden = !loggedIn;
+}
+
+
+function openLogin() {
+  loginOverlay.hidden = false;
+  loginNameInput.value = '';
+  loginNameInput.focus();
+}
+
+
+function closeLogin() {
+  loginOverlay.hidden = true;
+}
+
+
+loginButton.addEventListener('click', openLogin);
+loginNoteButton.addEventListener('click', openLogin);
+loginCancel.addEventListener('click', closeLogin);
+
+
+loginOverlay.addEventListener('click', event => {
+  if (event.target === loginOverlay) closeLogin();
+});
+
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !loginOverlay.hidden) closeLogin();
+});
+
+
+loginForm.addEventListener('submit', event => {
+  event.preventDefault();
+
+
+  const name = loginNameInput.value.trim();
+  if (!name) return;
+
+
+  currentUser = name;
+  try { localStorage.setItem(USER_KEY, name); } catch (e) {}
+
+
+  closeLogin();
+  updateUserUI();
+  renderPlants();
+});
+
+
+// 2.2 จำพรรณไม้ที่ลบระหว่างลงชื่อ เพื่อกู้คืนตอนออกจากระบบ
+//     เก็บใน localStorage จึงยังจำได้แม้รีเฟรชหน้า
+
+
+const DELETED_KEY = 'plantCloud.deletedThisSession';
+
+
+function getDeletedPlants() {
+  try {
+    const rows = JSON.parse(localStorage.getItem(DELETED_KEY));
+    return Array.isArray(rows) ? rows : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+
+function setDeletedPlants(rows) {
+  try {
+    if (rows.length) {
+      localStorage.setItem(DELETED_KEY, JSON.stringify(rows));
+    } else {
+      localStorage.removeItem(DELETED_KEY);
+    }
+  } catch (e) {}
+}
+
+
+function rememberDeleted(plant) {
+  const rows = getDeletedPlants();
+  // ถ้ารหัสเดียวกันเคยถูกลบแล้ว เก็บข้อมูลชุดแรก (ต้นฉบับ) ไว้
+  if (rows.some(p => p.plant_code === plant.plant_code)) return;
+
+
+  rows.push({
+    plant_code: plant.plant_code,
+    thai_name: plant.thai_name,
+    scientific_name: plant.scientific_name || null,
+    location: plant.location || null,
+    images: plant.images || []
+  });
+  setDeletedPlants(rows);
+}
+
+
+logoutButton.addEventListener('click', async () => {
+
+
+  const deleted = getDeletedPlants();
+
+
+  const question = deleted.length
+    ? 'ต้องการออกจากระบบใช่หรือไม่?\nพรรณไม้ที่ลบไป ' + deleted.length + ' รายการ จะถูกกู้คืน'
+    : 'ต้องการออกจากระบบใช่หรือไม่?';
+
+
+  if (!confirm(question)) return;
+
+
+  if (deleted.length) {
+
+
+    logoutButton.disabled = true;
+    logoutButton.textContent = 'กำลังกู้คืน...';
+
+
+    try {
+      // ignoreDuplicates: ถ้ามีคนเพิ่มรหัสเดิมกลับมาแล้ว จะไม่เขียนทับ
+      const { error } = await supabaseClient
+        .from(TABLE_NAME)
+        .upsert(deleted, { onConflict: 'plant_code', ignoreDuplicates: true });
+
+
+      if (error) {
+        alert('กู้คืนพรรณไม้ไม่สำเร็จ: ' + error.message + '\nยังไม่ได้ออกจากระบบ ลองใหม่อีกครั้ง');
+        return;
+      }
+    } catch (e) {
+      console.error(e);
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ ยังไม่ได้ออกจากระบบ');
+      return;
+    } finally {
+      logoutButton.disabled = false;
+      logoutButton.textContent = 'ออกจากระบบ';
+    }
+
+
+    setDeletedPlants([]);
+  }
+
+
+  if (editingCode !== null) cancelEdit();
+
+
+  currentUser = null;
+  try { localStorage.removeItem(USER_KEY); } catch (e) {}
+
+
+  showMessage('');
+  updateUserUI();
+
+
+  if (deleted.length) {
+    search.value = '';
+    await loadWithAnimation(deleted.map(p => p.plant_code), 'card-enter');
+  } else {
+    renderPlants();
+  }
+});
+
+
+// 3. แสดงข้อความแจ้งเตือน
+
+
+function showMessage(message, type = '') {
+  formMessage.textContent = message;
+  formMessage.className = type;
+}
+
+
+// 4. แสดงรายการพรรณไม้
+
+
+let animatedCard = null;
+
+
+function renderPlants() {
+
+
+  animatedCard = null;
+
+
+  const keyword = search.value.trim().toLowerCase();
+
+
+  const filtered = plants.filter(plant =>
+    String(plant.plant_code || '').toLowerCase().includes(keyword) ||
+    String(plant.thai_name || '').toLowerCase().includes(keyword) ||
+    String(plant.scientific_name || '').toLowerCase().includes(keyword) ||
+    String(plant.location || '').toLowerCase().includes(keyword)
+  );
+
+
+  list.replaceChildren();
+
+
+  if (filtered.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'message';
+    li.textContent = plants.length
+      ? 'ไม่พบข้อมูลที่ค้นหา'
+      : 'ยังไม่มีข้อมูลพรรณไม้';
+    list.appendChild(li);
+    return;
+  }
+
+
+  filtered.forEach(plant => {
+
+
+    const li = document.createElement('li');
+    li.className = 'plant-card';
+
+
+    const code = document.createElement('div');
+    code.className = 'plant-code';
+    code.textContent = plant.plant_code || 'ไม่มีรหัส';
+
+
+    const name = document.createElement('h4');
+    name.className = 'plant-name';
+    name.textContent = '🌿 ' + (plant.thai_name || 'ไม่ระบุชื่อ');
+
+
+    const scientific = document.createElement('p');
+    scientific.textContent =
+      'ชื่อวิทยาศาสตร์: ' + (plant.scientific_name || '-');
+
+
+    const location = document.createElement('p');
+    location.textContent =
+      '📍 สถานที่ปลูก: ' + (plant.location || '-');
+
+
+    li.dataset.code = plant.plant_code;
+
+
+    if (plant.plant_code === editingCode) {
+      li.classList.add('editing');
+    }
+
+
+    if (animateNext && animateNext.codes.includes(plant.plant_code)) {
+      li.classList.add(animateNext.type);
+      // ลบคลาสเมื่อแสงเรือง (อนิเมชันที่ยาวที่สุด) จบ เพื่อไม่ให้เล่นซ้ำ
+      li.addEventListener('animationend', function onEnd(event) {
+        if (event.animationName !== 'cardGlow') return;
+        li.classList.remove('card-enter', 'card-updated');
+        li.removeEventListener('animationend', onEnd);
+      });
+      if (!animatedCard) animatedCard = li; // ใบแรกใช้เลื่อนจอไปหา
+    }
+
+
+    const editButton = document.createElement('button');
+    editButton.type = 'button';
+    editButton.className = 'edit-button';
+    editButton.textContent = '✏️ แก้ไข';
+    editButton.addEventListener('click', () => startEdit(plant));
+
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'delete-button';
+    deleteButton.textContent = '🗑️ ลบ';
+    deleteButton.addEventListener('click', () =>
+      deletePlant(plant, deleteButton)
+    );
+
+
+    const images = plant.images || [];
+
+
+    if (images.length) {
+      const cover = document.createElement('button');
+      cover.type = 'button';
+      cover.className = 'card-cover';
+      cover.setAttribute('aria-label', 'ดูรูป ' + (plant.thai_name || ''));
+      cover.addEventListener('click', () => openLightbox(plant, 0));
+
+
+      const img = document.createElement('img');
+      img.src = imageUrl(images[0]);
+      img.alt = plant.thai_name || '';
+      img.loading = 'lazy';
+      cover.appendChild(img);
+
+
+      if (images.length > 1) {
+        const badge = document.createElement('span');
+        badge.className = 'photo-count';
+        badge.textContent = '📷 ' + images.length;
+        cover.appendChild(badge);
+      }
+
+
+      li.appendChild(cover);
+    }
+
+
+    li.append(code, name, scientific, location);
+
+
+    // ปุ่มแก้ไข/ลบ แสดงเฉพาะคนที่ลงชื่อแล้ว
+    if (currentUser) {
+      const actions = document.createElement('div');
+      actions.className = 'card-actions';
+
+
+      // ปุ่มเพิ่มรูปตรงการ์ด (ซ่อนเมื่อครบ 5 รูป)
+      if (images.length < MAX_IMAGES) {
+        const photoInput = document.createElement('input');
+        photoInput.type = 'file';
+        photoInput.accept = 'image/*';
+        photoInput.multiple = true;
+        photoInput.hidden = true;
+
+
+        const photoButton = document.createElement('button');
+        photoButton.type = 'button';
+        photoButton.className = 'photo-button';
+        photoButton.textContent = '📷 เพิ่มรูป (' + images.length + '/' + MAX_IMAGES + ')';
+        photoButton.addEventListener('click', () => photoInput.click());
+
+
+        photoInput.addEventListener('change', () => {
+          const files = [...photoInput.files];
+          photoInput.value = '';
+          addPhotosToPlant(plant, files, photoButton);
+        });
+
+
+        actions.append(photoInput, photoButton);
+      }
+
+
+      actions.append(editButton, deleteButton);
+      li.appendChild(actions);
+    }
+    list.appendChild(li);
+
+
+  });
+
+
+}
+
+
+// 5. โหลดข้อมูลจากฐานข้อมูล
+
+
+async function loadPlants() {
+
+
+  count.textContent = 'กำลังโหลด...';
+
+
+  const { data, error } = await db.select();
+
+
+  if (error) {
+    count.textContent = 'เกิดข้อผิดพลาด';
+
+
+    list.replaceChildren();
+
+
+    const li = document.createElement('li');
+    li.className = 'message';
+    li.textContent = 'ไม่สามารถโหลดข้อมูลได้: ' + error.message;
+
+
+    list.appendChild(li);
+
+
+    console.error(error);
+    return false;
+  }
+
+
+  plants = data || [];
+
+
+  count.textContent =
+    plants.length.toLocaleString('th-TH') + ' รายการ';
+
+
+  renderPlants();
+
+
+  return true;
+}
+
+
+// 5.1 สลับโหมด เพิ่มใหม่ / แก้ไข
+
+
+function startEdit(plant) {
+
+
+  editingCode = plant.plant_code;
+
+
+  codeInput.value = plant.plant_code || '';
+  codeInput.readOnly = true; // รหัสเป็นคีย์หลัก แก้ไม่ได้
+  document.getElementById('thaiName').value = plant.thai_name || '';
+  document.getElementById('scientificName').value = plant.scientific_name || '';
+  document.getElementById('location').value = plant.location || '';
+
+
+  clearFormImages();
+  formImages = (plant.images || []).map(path => ({ path }));
+  renderFormImages();
+
+
+  formTitle.textContent = '✏️ แก้ไขพรรณไม้ ' + plant.plant_code;
+  saveButton.textContent = 'บันทึกการแก้ไข';
+  cancelEditButton.hidden = false;
+  formSection.classList.add('editing');
+  showMessage('');
+
+
+  renderPlants();
+
+
+  formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('thaiName').focus({ preventScroll: true });
+}
+
+
+function cancelEdit() {
+
+
+  editingCode = null;
+
+
+  plantForm.reset();
+  clearFormImages();
+  codeInput.readOnly = false;
+
+
+  formTitle.textContent = '➕ เพิ่มข้อมูลพรรณไม้';
+  saveButton.textContent = 'บันทึกข้อมูล';
+  cancelEditButton.hidden = true;
+  formSection.classList.remove('editing');
+
+
+  renderPlants();
+}
+
+
+cancelEditButton.addEventListener('click', () => {
+  cancelEdit();
+  showMessage('');
+});
+
+
+// 6. บันทึกข้อมูลเมื่อกดปุ่ม (เพิ่มใหม่ หรือ บันทึกการแก้ไข)
+
+
+plantForm.addEventListener('submit', async function(event) {
+
+
+  event.preventDefault();
+
+
+  const plant = {
+    plant_code: document.getElementById('code').value.trim(),
+    thai_name: document.getElementById('thaiName').value.trim(),
+    scientific_name:
+      document.getElementById('scientificName').value.trim() || null,
+    location:
+      document.getElementById('location').value.trim() || null
+  };
+
+
+  if (!plant.plant_code || !plant.thai_name) {
+    showMessage('กรุณากรอกข้อมูลให้ครบ', 'error');
+    return;
+  }
+
+
+  const isEditing = editingCode !== null;
+  const newFiles = formImages.filter(item => item.file).map(item => item.file);
+
+
+  let uploaded = [];  // path ของรูปที่อัปโหลดในรอบนี้
+  let saved = false;  // บันทึกลงตารางสำเร็จหรือยัง (ถ้าไม่สำเร็จจะลบรูปที่อัปไปทิ้ง)
+
+
+  saveButton.disabled = true;
+  cancelEditButton.disabled = true;
+  saveButton.textContent = newFiles.length
+    ? 'กำลังอัปโหลดรูป...'
+    : 'กำลังบันทึก...';
+
+
+  showMessage('');
+
+
+  try {
+
+
+    if (newFiles.length) {
+      uploaded = await uploadImages(newFiles);
+      saveButton.textContent = 'กำลังบันทึก...';
+    }
+
+
+    // เรียงรูปตามลำดับในฟอร์ม (รูปเดิมใช้ path เดิม รูปใหม่ใช้ path ที่เพิ่งอัป)
+    let next = 0;
+    plant.images = formImages.map(item => item.path || uploaded[next++]);
+
+
+    if (isEditing) {
+
+
+      const { data, error } = await db.update(editingCode, {
+        thai_name: plant.thai_name,
+        scientific_name: plant.scientific_name,
+        location: plant.location,
+        images: plant.images
+      });
+
+
+      if (error) {
+        showMessage('แก้ไขไม่สำเร็จ: ' + error.message, 'error');
+        return;
+      }
+
+
+      if (!data || data.length === 0) {
+        showMessage(
+          'แก้ไขไม่สำเร็จ: ไม่มีสิทธิ์แก้ไขข้อมูล (ตรวจสอบ policy ใน Supabase)',
+          'error'
+        );
+        return;
+      }
+
+
+      saved = true;
+
+
+      // ลบไฟล์รูปที่เอาออกระหว่างแก้ไข (ทำเบื้องหลัง)
+      removeImages(removedImages.slice());
+
+
+      const updatedCode = editingCode;
+      cancelEdit();
+      showMessage('แก้ไขข้อมูลสำเร็จแล้ว!', 'success');
+      await loadWithAnimation(updatedCode, 'card-updated');
+      return;
+    }
+
+
+    const { error } = await db.insert(plant);
+
+
+    if (error) {
+
+
+      if (error.code === '23505') {
+        showMessage('รหัสพรรณไม้นี้มีอยู่แล้ว', 'error');
+      } else {
+        showMessage(
+          'บันทึกไม่สำเร็จ: ' + error.message,
+          'error'
+        );
+      }
+
+
+      return;
+    }
+
+
+    saved = true;
+
+
+    showMessage('บันทึกข้อมูลสำเร็จแล้ว!', 'success');
+
+
+    plantForm.reset();
+    clearFormImages();
+
+
+    search.value = '';
+
+
+    await loadWithAnimation(plant.plant_code, 'card-enter');
+
+
+  } catch (error) {
+
+
+    console.error(error);
+
+
+    showMessage(
+      error && error.message ? error.message : 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+      'error'
+    );
+
+
+  } finally {
+
+
+    // บันทึกไม่สำเร็จ → ลบรูปที่เพิ่งอัปโหลดทิ้ง ไม่ให้ค้างใน Storage
+    if (!saved && uploaded.length) {
+      removeImages(uploaded);
+    }
+
+
+    saveButton.disabled = false;
+    cancelEditButton.disabled = false;
+    saveButton.textContent =
+      editingCode !== null ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล';
+
+
+  }
+
+
+});
+
+
+// 6.0 ตัวช่วยอนิเมชัน
+
+
+// โหลดรายการใหม่ แล้วให้การ์ดที่ระบุเล่นอนิเมชัน + เลื่อนจอไปหา
+// codes: รหัสเดียว หรือ array ของรหัส
+async function loadWithAnimation(codes, type) {
+  animateNext = { codes: [].concat(codes), type };
+  await loadPlants();
+  animateNext = null;
+
+
+  if (animatedCard) {
+    animatedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+
+// เล่นอนิเมชันการ์ดหายไป แล้วรอจนจบ (มีเวลาสำรองกันค้าง)
+function playLeaveAnimation(card) {
+  return new Promise(resolve => {
+    if (!card) return resolve();
+
+
+    const done = () => { clearTimeout(timer); resolve(); };
+    const timer = setTimeout(done, 700);
+
+
+    card.addEventListener('animationend', done, { once: true });
+    card.classList.add('card-leave');
+  });
+}
+
+
+// 6.0.1 เพิ่มรูปตรงการ์ด (ไม่ต้องเข้าโหมดแก้ไข)
+
+
+async function addPhotosToPlant(plant, files, button) {
+
+
+  const current = plant.images || [];
+  const space = MAX_IMAGES - current.length;
+  const picked = files.filter(f => f.type.startsWith('image/'));
+
+
+  if (picked.length === 0) return;
+
+
+  if (space <= 0) {
+    alert('พรรณไม้นี้มีรูปครบ ' + MAX_IMAGES + ' รูปแล้ว');
+    return;
+  }
+
+
+  if (picked.length > space) {
+    alert('ใส่รูปได้ไม่เกิน ' + MAX_IMAGES + ' รูป\nเพิ่มได้อีก ' + space + ' รูป ระบบจะเลือกรูปแรกๆ ให้');
+  }
+
+
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = 'กำลังอัปโหลด...';
+
+
+  let uploaded = [];
+  let saved = false;
+
+
+  try {
+
+
+    uploaded = await uploadImages(picked.slice(0, space));
+
+
+    const { data, error } = await db.update(plant.plant_code, {
+      images: current.concat(uploaded)
+    });
+
+
+    if (error) {
+      alert('เพิ่มรูปไม่สำเร็จ: ' + error.message);
+      return;
+    }
+
+
+    if (!data || data.length === 0) {
+      alert('เพิ่มรูปไม่สำเร็จ: ไม่มีสิทธิ์แก้ไขข้อมูล (ตรวจสอบ policy ใน Supabase)');
+      return;
+    }
+
+
+    saved = true;
+
+
+    // ถ้ากำลังแก้ไขพรรณไม้นี้อยู่ในฟอร์ม ให้รูปใหม่โผล่ในฟอร์มด้วย
+    if (editingCode === plant.plant_code) {
+      formImages.push(...uploaded.map(path => ({ path })));
+      renderFormImages();
+    }
+
+
+    await loadWithAnimation(plant.plant_code, 'card-updated');
+
+
+  } catch (error) {
+
+
+    console.error(error);
+    alert(error && error.message ? error.message : 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+
+
+  } finally {
+
+
+    // บันทึกไม่สำเร็จ → ลบรูปที่เพิ่งอัปโหลดทิ้ง
+    if (!saved && uploaded.length) {
+      removeImages(uploaded);
+    }
+
+
+    if (button.isConnected) {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+}
+
+
+// 6.1 ลบพรรณไม้
+
+
+async function deletePlant(plant, button) {
+
+
+  const label = plant.plant_code + ' ' + (plant.thai_name || '');
+
+
+  if (!confirm('ต้องการลบพรรณไม้ "' + label + '" ใช่หรือไม่?\n(จะถูกกู้คืนเมื่อออกจากระบบ)')) {
+    return;
+  }
+
+
+  button.disabled = true;
+  button.textContent = 'กำลังลบ...';
+
+
+  try {
+
+
+    const { data, error } = await db.remove(plant.plant_code);
+
+
+    if (error) {
+      alert('ลบไม่สำเร็จ: ' + error.message);
+      return;
+    }
+
+
+    if (!data || data.length === 0) {
+      alert('ลบไม่สำเร็จ: ไม่มีสิทธิ์ลบข้อมูล (ตรวจสอบ policy ใน Supabase)');
+      return;
+    }
+
+
+    // จำไว้ เพื่อกู้คืนตอนออกจากระบบ
+    rememberDeleted(plant);
+
+
+    // เล่นอนิเมชันการ์ดหายไปก่อน แล้วค่อยโหลดรายการใหม่
+    await playLeaveAnimation(button.closest('.plant-card'));
+
+
+    // ถ้าลบรายการที่กำลังแก้ไขอยู่ ให้ออกจากโหมดแก้ไข
+    if (editingCode === plant.plant_code) {
+      cancelEdit();
+    }
+
+
+    await loadPlants();
+
+
+  } catch (error) {
+
+
+    console.error(error);
+    alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+
+
+  } finally {
+
+
+    if (button.isConnected) {
+      button.disabled = false;
+      button.textContent = '🗑️ ลบ';
+    }
+
+
+  }
+}
+
+
+// 7. ค้นหาข้อมูล
+
+
+search.addEventListener('input', renderPlants);
+
+
+// 7.1 ดูรูปขนาดใหญ่ (lightbox)
+
+
+const lightbox = document.getElementById('lightbox');
+const lightboxImage = document.getElementById('lightboxImage');
+const lightboxCaption = document.getElementById('lightboxCaption');
+const lightboxPrev = document.getElementById('lightboxPrev');
+const lightboxNext = document.getElementById('lightboxNext');
+const lightboxClose = document.getElementById('lightboxClose');
+
+
+let lightboxImages = [];
+let lightboxIndex = 0;
+let lightboxTitle = '';
+
+
+function openLightbox(plant, index) {
+  lightboxImages = plant.images || [];
+  if (!lightboxImages.length) return;
+
+
+  lightboxTitle = (plant.thai_name || '') + ' · ' + plant.plant_code;
+  lightboxIndex = index;
+  lightbox.hidden = false;
+  showLightboxImage();
+  lightboxClose.focus();
+}
+
+
+function showLightboxImage() {
+  const total = lightboxImages.length;
+  lightboxImage.src = imageUrl(lightboxImages[lightboxIndex]);
+  lightboxImage.alt = lightboxTitle;
+  lightboxCaption.textContent =
+    lightboxTitle + (total > 1 ? '  (' + (lightboxIndex + 1) + '/' + total + ')' : '');
+  lightboxPrev.hidden = total < 2;
+  lightboxNext.hidden = total < 2;
+}
+
+
+function stepLightbox(step) {
+  const total = lightboxImages.length;
+  lightboxIndex = (lightboxIndex + step + total) % total;
+  showLightboxImage();
+}
+
+
+function closeLightbox() {
+  lightbox.hidden = true;
+  lightboxImage.removeAttribute('src');
+}
+
+
+lightboxPrev.addEventListener('click', () => stepLightbox(-1));
+lightboxNext.addEventListener('click', () => stepLightbox(1));
+lightboxClose.addEventListener('click', closeLightbox);
+
+
+lightbox.addEventListener('click', event => {
+  if (event.target === lightbox) closeLightbox();
+});
+
+
+document.addEventListener('keydown', event => {
+  if (lightbox.hidden) return;
+  if (event.key === 'Escape') closeLightbox();
+  if (event.key === 'ArrowLeft' && lightboxImages.length > 1) stepLightbox(-1);
+  if (event.key === 'ArrowRight' && lightboxImages.length > 1) stepLightbox(1);
+});
+
+
+// 8. ย้ายข้อมูลเก่าจาก localStorage ขึ้น Supabase (ทำครั้งเดียว)
+
+
+const OLD_STORAGE_KEY = 'plantCloud.plants';
+
+
+async function migrateLocalData() {
+  let oldRows = [];
+  try {
+    oldRows = JSON.parse(localStorage.getItem(OLD_STORAGE_KEY)) || [];
+  } catch (e) {
+    return;
+  }
+  if (!Array.isArray(oldRows) || oldRows.length === 0) return;
+
+
+  const rows = oldRows
+    .filter(p => p && p.plant_code && p.thai_name)
+    .map(p => ({
+      plant_code: String(p.plant_code).trim(),
+      thai_name: String(p.thai_name).trim(),
+      scientific_name: p.scientific_name || null,
+      location: p.location || null
+    }));
+
+
+  if (rows.length === 0) return;
+
+
+  // ignoreDuplicates: รหัสที่มีใน Supabase แล้วจะถูกข้าม ไม่เขียนทับ
+  const { error } = await supabaseClient
+    .from(TABLE_NAME)
+    .upsert(rows, { onConflict: 'plant_code', ignoreDuplicates: true });
+
+
+  if (error) {
+    console.error('ย้ายข้อมูลเก่าไม่สำเร็จ', error);
+    return;
+  }
+
+
+  try { localStorage.removeItem(OLD_STORAGE_KEY); } catch (e) {}
+  console.log('ย้ายข้อมูลเก่าขึ้น Supabase แล้ว ' + rows.length + ' รายการ');
+}
+
+
+// 9. เริ่มต้นระบบ
+
+
+updateUserUI();
+renderFormImages();
+
+
+(async () => {
+  await migrateLocalData();
+  await loadPlants();
+})();
+
+
+</script>
+
+
+</body>
+</html>
